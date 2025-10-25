@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML Sample</title>
+  <style>
+    body {
+      background-color: beige;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body id="parent">
+  <iframe id="frame1" name="frame1" src="frame1.html" width="200" height="200" style="border:2px solid blue;">
+  </iframe>
+  <iframe id="frame2" name="frame2" src="frame2.html" width="200" height="200" style="border:2px solid red;"></iframe>
+  <script>
+  var frames = [];
+
+  function setLeaveEvent(targetWin) {
+    targetWin.addEventListener('load', function(e) {
+      var targetWin = e.target;
+
+      var info = {
+        targetWin : targetWin,
+        isOn: false
+      }
+      addEvent(targetWin);
+      frames.push(info);
+    });
+  }
+  function addEvent(targetWin) {
+    //mouseleaveはpaptureをtrueにすると、別要素にカーソルがいくと発火してしまう
+    //mouseleaveはバブリングしないためcaptureはfalseでOK
+    targetWin.addEventListener("mouseleave", handlerOff);
+    targetWin.addEventListener("pointerdown", handlerOn, true);
+    targetWin.addEventListener("pointerup", handlerOff, true);
+    targetWin.addEventListener("pagehide", function() {
+      targetWin.removeEventListener("mouseleave", handlerOff);
+      targetWin.removeEventListener("pointerdown", handlerOn);
+      targetWin.removeEventListener("pointerup", handlerOff);
+    });
+  }
+  function handlerOn(e) {
+    var targetWin = e.currentTarget;
+    setTargetInfo(targetWin, true);
+    console.log(`On: e=` + e.type + ' winName:' + targetWin.name);
+  }
+  function handlerOff(e) {
+    var targetWin = e.currentTarget;
+    //var targetWin = targetDoc.defaultView;
+    console.log(`Off: e=` + e.type + ' winName:' + targetWin.name);
+  }
+
+  function getTargetInfoList(targetWin) {
+    var targetInfoList = frames.filter(function (info) {
+      return (info.targetWin === targetWin);
+    });
+    return targetInfoList;
+  }
+
+  function setTargetInfo(targetWin, isOn) {
+    var targetInfoList = getTargetInfoList();
+    targetInfoList.forEach(function (info) {
+      info.isOn = true;
+    });
+  }
+
+  // 親全体にleaveしたときも拾える
+  document.addEventListener("mouseleave", () => {
+    console.log("カーソルがウィンドウ全体から離れました");
+  });
+
+  </script>
+</body>
+</html>
