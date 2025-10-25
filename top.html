@@ -20,20 +20,23 @@
 
   function setLeaveEvent(targetWin) {
     targetWin.addEventListener('load', function(e) {
-      var targetWin = e.target;
+      var targetDoc = e.target;
+      var targetWin = targetDoc.defaultView;
 
       var info = {
         targetWin : targetWin,
         isOn: false
       }
-      addEvent(targetWin);
+      addEvent(targetWin, targetDoc);
       frames.push(info);
     });
   }
-  function addEvent(targetWin) {
+  function addEvent(targetWin, targetDoc) {
     //mouseleaveはpaptureをtrueにすると、別要素にカーソルがいくと発火してしまう
     //mouseleaveはバブリングしないためcaptureはfalseでOK
-    targetWin.addEventListener("mouseleave", handlerOff);
+    //leaveはWindowオブジェではなくDocumentでないと登録できない
+    //要素外upは、pointerupを使えば要素外はなしても発火しそう
+    //targetDoc.addEventListener("mouseleave", handlerOff);
     targetWin.addEventListener("pointerdown", handlerOn, true);
     targetWin.addEventListener("pointerup", handlerOff, true);
     targetWin.addEventListener("pagehide", function() {
@@ -44,26 +47,35 @@
   }
   function handlerOn(e) {
     var targetWin = e.currentTarget;
+    //var targetWin = targetDoc.defaultView;
     setTargetInfo(targetWin, true);
     console.log(`On: e=` + e.type + ' winName:' + targetWin.name);
+    showlog();
   }
   function handlerOff(e) {
     var targetWin = e.currentTarget;
-    //var targetWin = targetDoc.defaultView;
+   // var targetWin = targetDoc.defaultView;
+   setTargetInfo(targetWin, false);
     console.log(`Off: e=` + e.type + ' winName:' + targetWin.name);
+    showlog();
   }
-
+  function showlog () {
+    frames.forEach((obj, index) => {
+      console.log("Index:", index, obj);
+    });
+  }
   function getTargetInfoList(targetWin) {
     var targetInfoList = frames.filter(function (info) {
+      console.log(info.targetWin.name);
       return (info.targetWin === targetWin);
     });
     return targetInfoList;
   }
 
   function setTargetInfo(targetWin, isOn) {
-    var targetInfoList = getTargetInfoList();
+    var targetInfoList = getTargetInfoList(targetWin);
     targetInfoList.forEach(function (info) {
-      info.isOn = true;
+      info.isOn = isOn;
     });
   }
 
