@@ -17,6 +17,7 @@
   </iframe>
   <iframe id="frame2" name="frame2" src="frame2.html" width="200" height="200" style="border:2px solid red;"></iframe>
   <button id="logclearbtn" onclick="clearLog()">clear</button>
+  <button id="changeFrm" onclick="changeFrame2Url()">changeFrame2Url</button>
   <div id="log" style="width: 500px; height: 300px; border:2px solid green; overflow: auto;">
   </div>
   <script>
@@ -49,11 +50,16 @@
     //mouseleaveはpaptureをtrueにすると、別要素にカーソルがいくと発火してしまう
     //mouseleaveはバブリングしないためcaptureはfalseでOK
     //leaveはWindowオブジェではなくDocumentでないと登録できない
-    //要素外upは、pointerupを使えばPCの場合は要素外はなしても発火する
+
+    //pointerupを使えば、要素外でUpされても発火する
+    //そのためleave関連は不要
     //targetDoc.addEventListener("mouseleave", handlerOff);
+    //targetWin.addEventListener("pointerleave", handlerOff, true);
+
+    // src属性が変わったら、再度イベントをつけなおす必要あり
+
     targetWin.addEventListener("pointerdown", handlerOn, true);
     targetWin.addEventListener("pointerup", handlerOff, true);
-    //targetWin.addEventListener("pointerleave", handlerOff, true);
     targetWin.addEventListener("pointercancel", handlerOff, true);
     //visibility hiddenもした方がよい
 
@@ -92,10 +98,26 @@
     var logElem = document.getElementById("log");
     logElem.innerHTML = "log";
   }
+  function changeFrame2Url() {
+    var iframe2 = document.querySelector("#frame2");
+    if (iframe2.src.includes("frame2")) {
+      iframe2.src = "frame3.html";
+    } else {
+      iframe2.src = "frame2.html";
+    }
+  } 
+
   function getTargetInfoList(targetWin) {
     var targetInfoList = frames.filter(function (info) {
       //console.log(info.targetWin.name);
       return (info.targetWin === targetWin);
+    });
+    return targetInfoList;
+  }
+
+  function getTargetInfoListByName(name) {
+    var targetInfoList = frames.filter(function (info) {
+      return (info.targetWin.name === name);
     });
     return targetInfoList;
   }
