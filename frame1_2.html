@@ -9,16 +9,22 @@
       width: 100%;
       height: 100%;
     }
+    #button:active {
+      background-color: blue;
+    }
   </style>
 </head>
 <body id="frame1_2">
   <label>frame1_2</label>
-  <input value="abc">
+  <button id="button" style="font-size:30px;">button</button>
   <script>
     top.setLeaveEvent(window);
     window.addEventListener("pointerdown", function() {
-      console.log("frame1-2 down!");
-    }, true);
+      top.showlog("child frame1-2 pointerdown!");
+    }, false);
+    // window.addEventListener("touchstart", function() {
+    //   top.showlog("child frame1-2 touchstart!");
+    // }, true);    
   </script>
 </body>
 </html>
